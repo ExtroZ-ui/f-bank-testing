@@ -15,20 +15,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install Chrome
-        uses: browser-actions/setup-chrome@v1
-
-      - name: Install ChromeDriver
+      - name: Install Chromium and ChromeDriver
         run: |
           sudo apt-get update
-          sudo apt-get install -y chromium-chromedriver
+          sudo apt-get install -y chromium-driver chromium-browser || sudo apt-get install -y chromium-driver chromium
+          which chromium-browser || true
+          which chromium || true
+          which chromedriver || true
 
       - name: Install autotest dependencies
         working-directory: autotests
@@ -53,4 +53,6 @@ jobs:
 
       - name: Run Selenium tests
         working-directory: autotests
+        env:
+          CHROME_BIN: /usr/bin/chromium
         run: npm test
