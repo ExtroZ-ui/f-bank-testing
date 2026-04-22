@@ -22,24 +22,22 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Setup Google Chrome
-        uses: browser-actions/setup-chrome@v1
+      - name: Setup Chrome and matching ChromeDriver
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: stable
+          install-chromedriver: true
+          install-dependencies: true
 
-      - name: Install ChromeDriver
+      - name: Export browser paths
         run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-driver
-
-      - name: Detect browser and driver paths
-        run: |
-          CHROME_PATH="$(which google-chrome-stable || which google-chrome || which chromium || which chromium-browser)"
-          DRIVER_PATH="$(which chromedriver)"
-          echo "CHROME_BIN=$CHROME_PATH" >> $GITHUB_ENV
-          echo "CHROMEDRIVER_PATH=$DRIVER_PATH" >> $GITHUB_ENV
-          echo "Chrome path: $CHROME_PATH"
-          echo "Driver path: $DRIVER_PATH"
-          "$CHROME_PATH" --version
-          "$DRIVER_PATH" --version
+          echo "CHROME_BIN=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
+          echo "CHROMEDRIVER_PATH=${{ steps.setup-chrome.outputs.chromedriver-path }}" >> $GITHUB_ENV
+          echo "Chrome path: ${{ steps.setup-chrome.outputs.chrome-path }}"
+          echo "ChromeDriver path: ${{ steps.setup-chrome.outputs.chromedriver-path }}"
+          "${{ steps.setup-chrome.outputs.chrome-path }}" --version
+          "${{ steps.setup-chrome.outputs.chromedriver-path }}" --version
 
       - name: Install autotest dependencies
         working-directory: autotests
