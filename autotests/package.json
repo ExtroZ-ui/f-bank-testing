@@ -1,0 +1,14 @@
+{
+  "name": "bank-tests",
+  "version": "1.0.0",
+  "scripts": {
+    "test-success": "node tests/test-success.js",
+    "test-defect-boundary": "node tests/test-defect-boundary.js",
+    "test-defect-card": "node tests/test-defect-card.js",
+    "test": "node tests/test-success.js && node tests/test-defect-boundary.js",
+    "test-all-local": "node tests/test-success.js ; node tests/test-defect-boundary.js ; node tests/test-defect-card.js"
+  },
+  "dependencies": {
+    "selenium-webdriver": "^4.20.0"
+  }
+}
