@@ -7,7 +7,7 @@ const chrome = require('selenium-webdriver/chrome');
   options.addArguments('--no-sandbox');
   options.addArguments('--disable-dev-shm-usage');
   options.addArguments('--window-size=1400,1000');
-  options.setChromeBinaryPath(process.env.CHROME_BIN || '/usr/bin/chromium');
+  options.setChromeBinaryPath(process.env.CHROME_BIN || '/usr/bin/google-chrome');
 
   const service = new chrome.ServiceBuilder(
     process.env.CHROMEDRIVER_PATH || '/usr/bin/chromedriver'
