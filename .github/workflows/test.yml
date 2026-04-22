@@ -25,10 +25,12 @@ jobs:
       - name: Install Chromium and ChromeDriver
         run: |
           sudo apt-get update
-          sudo apt-get install -y chromium-driver chromium-browser || sudo apt-get install -y chromium-driver chromium
-          which chromium-browser || true
-          which chromium || true
-          which chromedriver || true
+          sudo apt-get install -y chromium chromium-driver
+          echo "CHROME_BIN=$(which chromium)" >> $GITHUB_ENV
+          echo "CHROMEDRIVER_PATH=$(which chromedriver)" >> $GITHUB_ENV
+          which chromium
+          which chromedriver
+          chromedriver --version
 
       - name: Install autotest dependencies
         working-directory: autotests
@@ -54,5 +56,6 @@ jobs:
       - name: Run Selenium tests
         working-directory: autotests
         env:
-          CHROME_BIN: /usr/bin/chromium
+          CHROME_BIN: ${{ env.CHROME_BIN }}
+          CHROMEDRIVER_PATH: ${{ env.CHROMEDRIVER_PATH }}
         run: npm test

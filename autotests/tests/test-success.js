@@ -9,9 +9,14 @@ const chrome = require('selenium-webdriver/chrome');
   options.addArguments('--window-size=1400,1000');
   options.setChromeBinaryPath(process.env.CHROME_BIN || '/usr/bin/chromium');
 
+  const service = new chrome.ServiceBuilder(
+    process.env.CHROMEDRIVER_PATH || '/usr/bin/chromedriver'
+  );
+
   let driver = await new Builder()
     .forBrowser('chrome')
     .setChromeOptions(options)
+    .setChromeService(service)
     .build();
 
   try {
