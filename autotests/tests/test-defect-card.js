@@ -11,11 +11,10 @@ function sleep(ms) {
   options.addArguments('--no-sandbox');
   options.addArguments('--disable-dev-shm-usage');
   options.addArguments('--window-size=1400,1000');
-  options.setChromeBinaryPath(process.env.CHROME_BIN || '/usr/bin/google-chrome');
+  options.setChromeBinaryPath(process.env.CHROME_BIN);
 
   const service = new chrome.ServiceBuilder(
-    process.env.CHROMEDRIVER_PATH || '/usr/bin/chromedriver'
-  );
+    process.env.CHROMEDRIVER_PATH );
 
   let driver = await new Builder()
     .forBrowser('chrome')

@@ -29,12 +29,17 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y chromium-driver
-          echo "CHROME_BIN=$(which google-chrome)" >> $GITHUB_ENV
-          echo "CHROMEDRIVER_PATH=$(which chromedriver)" >> $GITHUB_ENV
-          which google-chrome
-          which chromedriver
-          google-chrome --version
-          chromedriver --version
+
+      - name: Detect browser and driver paths
+        run: |
+          CHROME_PATH="$(which google-chrome-stable || which google-chrome || which chromium || which chromium-browser)"
+          DRIVER_PATH="$(which chromedriver)"
+          echo "CHROME_BIN=$CHROME_PATH" >> $GITHUB_ENV
+          echo "CHROMEDRIVER_PATH=$DRIVER_PATH" >> $GITHUB_ENV
+          echo "Chrome path: $CHROME_PATH"
+          echo "Driver path: $DRIVER_PATH"
+          "$CHROME_PATH" --version
+          "$DRIVER_PATH" --version
 
       - name: Install autotest dependencies
         working-directory: autotests
