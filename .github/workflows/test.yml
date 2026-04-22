@@ -26,11 +26,10 @@ jobs:
         uses: browser-actions/setup-chrome@v1
 
       - name: Install autotest dependencies
-        working-directory: dist/autotests
+        working-directory: autotests
         run: npm install
 
       - name: Start application
-        working-directory: dist
         run: |
           python3 -m http.server 8000 > server.log 2>&1 &
           echo $! > server.pid
@@ -48,5 +47,5 @@ jobs:
           exit 1
 
       - name: Run Selenium tests
-        working-directory: dist/autotests
+        working-directory: autotests
         run: npm test
