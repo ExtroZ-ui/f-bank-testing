@@ -43,26 +43,24 @@ jobs:
         working-directory: autotests
         run: npm install
 
-      - name: Start application
-        run: |
-          python3 -m http.server 8000 > server.log 2>&1 &
-          echo $! > server.pid
-
-      - name: Wait for application
-        run: |
-          for i in {1..20}; do
-            if curl -s http://127.0.0.1:8000/?balance=30000&reserved=20001 > /dev/null; then
-              echo "Application is up"
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "Application did not start"
-          exit 1
-
-      - name: Run Selenium tests
+      - name: Start app and run Selenium tests
         working-directory: autotests
         env:
           CHROME_BIN: ${{ env.CHROME_BIN }}
           CHROMEDRIVER_PATH: ${{ env.CHROMEDRIVER_PATH }}
-        run: npm test
+        run: |
+          cd ..
+          python3 -m http.server 8000 > server.log 2>&1 &
+          SERVER_PID=$!
+          echo "Started server with PID $SERVER_PID"
+
+          for i in {1..20}; do
+            if curl -s http://127.0.0.1:8000/?balance=30000&reserved=20001 > /dev/null; then
+              echo "Application is up"
+              break
+            fi
+            sleep 1
+          done
+
+          cd autotests
+          npm test
