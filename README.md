@@ -15,18 +15,18 @@
 ## 📂 Структура репозитория
 
 manual/
-├── test-design.md      # тест-дизайн  
-├── test-cases.md       # ручные тест-кейсы  
-└── bug-reports.md      # баг-репорты  
+├── [test-design.md](manual/test-design.md) — тест-дизайн  
+├── [test-cases.md](manual/test-cases.md) — ручные тест-кейсы  
+└── [bug-reports.md](manual/bug-reports.md) — баг-репорты  
 
 autotests/
-├── tests/              # Selenium тесты  
-└── package.json        # зависимости и скрипты  
+├── tests/ — Selenium тесты  
+└── package.json — зависимости и скрипты  
 
 .github/workflows/
-└── test.yml            # CI (GitHub Actions)  
+└── test.yml — CI (GitHub Actions)  
 
-dist/                   # тестируемое приложение  
+dist/ — тестируемое приложение  
 
 ---
 
