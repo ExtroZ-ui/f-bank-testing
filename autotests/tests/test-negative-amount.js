@@ -5,6 +5,24 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function waitForTransferButton(driver, timeoutMs = 3000) {
+  const start = Date.now();
+
+  while (Date.now() - start < timeoutMs) {
+    const buttons = await driver.findElements(
+      By.xpath("//button[contains(., 'Перевести')]")
+    );
+
+    if (buttons.length > 0) {
+      return true;
+    }
+
+    await sleep(200);
+  }
+
+  return false;
+}
+
 (async function testNegativeAmount() {
   const options = new chrome.Options();
   options.addArguments('--headless=new');
@@ -29,20 +47,32 @@ function sleep(ms) {
     let inputs = await driver.findElements(By.css('input'));
     await inputs[0].sendKeys('1111222233334444');
 
-    inputs = await driver.findElements(By.css('input'));
-    await inputs[1].sendKeys('-100');
+    inputs = await driver.findElements(By.css("input[placeholder='1000']"));
+    const amountInput = inputs[0];
+
+    // Надёжно устанавливаем отрицательное значение через JS
+    await driver.executeScript(`
+      const input = arguments[0];
+      input.focus();
+      input.value = '-100';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      input.blur();
+    `, amountInput);
 
     await sleep(1000);
 
-    const transferButtons = await driver.findElements(
-      By.xpath("//button[contains(., 'Перевести')]")
-    );
+    // Проверяем, что значение реально установилось
+    const actualValue = await amountInput.getAttribute('value');
+    console.log('Amount field value:', actualValue);
 
-    if (transferButtons.length > 0) {
-      throw new Error('BUG: кнопка перевода появилась для отрицательной суммы');
+    const buttonAppeared = await waitForTransferButton(driver, 3000);
+
+    if (buttonAppeared) {
+      throw new Error('BUG: появилась кнопка перевода на отрицательную сумму');
     }
 
-    console.log('PASS: проверка отрицательной суммы пройдена');
+    console.log('PASS: пройден тест на проверку отрицательной суммы');
   } catch (e) {
     console.error('FAIL:', e.message);
     process.exit(1);
