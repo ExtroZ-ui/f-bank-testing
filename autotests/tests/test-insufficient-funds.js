@@ -44,7 +44,7 @@ const chrome = require('selenium-webdriver/chrome');
       throw new Error('Нет сообщения о недостатке средств');
     }
 
-    console.log('OK: тест на недостаточность средств пройден');
+    console.log('PASS: тест на недостаточность средств пройден');
   } catch (e) {
     console.error('FAIL:', e.message);
     process.exit(1);

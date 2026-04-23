@@ -42,7 +42,7 @@ function sleep(ms) {
       throw new Error('BUG: кнопка перевода появилась для отрицательной суммы');
     }
 
-    console.log('OK: проверка отрицательной суммы пройдена');
+    console.log('PASS: проверка отрицательной суммы пройдена');
   } catch (e) {
     console.error('FAIL:', e.message);
     process.exit(1);

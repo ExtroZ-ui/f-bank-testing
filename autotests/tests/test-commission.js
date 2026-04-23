@@ -36,7 +36,7 @@ const chrome = require('selenium-webdriver/chrome');
       throw new Error(`Ожидалась комиссия 900, получено: ${commissionText}`);
     }
 
-    console.log('ОК: тест расчета комиссионных пройден.');
+    console.log('PASS: тест расчета комиссионных пройден.');
   } catch (e) {
     console.error('FAIL:', e.message);
     process.exit(1);

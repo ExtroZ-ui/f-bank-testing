@@ -37,7 +37,7 @@ const chrome = require('selenium-webdriver/chrome');
       throw new Error('BUG: перевод должен быть возможен, но кнопки нет');
     }
 
-    console.log('OK');
+    console.log('PASS');
   } catch (e) {
     console.error('TEST FAILED:', e.message);
     process.exit(1);

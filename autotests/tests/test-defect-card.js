@@ -40,7 +40,7 @@ function sleep(ms) {
       throw new Error('BUG: поле суммы появилось для карты длиной 17 цифр');
     }
 
-    console.log('OK');
+    console.log('PASS');
   } catch (e) {
     console.error('TEST FAILED:', e.message);
     process.exit(1);

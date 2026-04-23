@@ -29,7 +29,7 @@ const chrome = require('selenium-webdriver/chrome');
     inputs = await driver.findElements(By.css('input'));
     await inputs[1].sendKeys('1000');
 
-    console.log('OK: тест на успех пройден');
+    console.log('PASS: тест на успех пройден');
   } catch (e) {
     console.error('FAIL:', e);
     process.exit(1);

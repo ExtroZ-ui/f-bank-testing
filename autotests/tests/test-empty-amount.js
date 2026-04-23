@@ -39,7 +39,7 @@ function sleep(ms) {
       throw new Error('BUG: кнопка перевода появилась без ввода суммы');
     }
 
-    console.log('OK: пройден тест на проверку пустого количества');
+    console.log('PASS: пройден тест на проверку пустого количества');
   } catch (e) {
     console.error('FAIL:', e.message);
     process.exit(1);

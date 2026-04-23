@@ -39,7 +39,7 @@ function sleep(ms) {
       throw new Error('BUG: для номера карты длиной менее 16 цифр появилось поле сумма');
     }
 
-    console.log('OK: тест валидации на короткий номер карты пройден');
+    console.log('PASS: тест валидации на короткий номер карты пройден');
   } catch (e) {
     console.error('FAIL:', e.message);
     process.exit(1);
