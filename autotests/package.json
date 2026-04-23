@@ -3,10 +3,19 @@
   "version": "1.0.0",
   "scripts": {
     "test-success": "node tests/test-success.js",
+    "test-insufficient-funds": "node tests/test-insufficient-funds.js",
+    "test-negative-amount": "node tests/test-negative-amount.js",
+    "test-commission": "node tests/test-commission.js",
+    "test-short-card": "node tests/test-short-card.js",
+    "test-empty-amount": "node tests/test-empty-amount.js",
     "test-defect-boundary": "node tests/test-defect-boundary.js",
     "test-defect-card": "node tests/test-defect-card.js",
-    "test": "node tests/test-success.js && node tests/test-defect-boundary.js",
-    "test-all-local": "node tests/test-success.js ; node tests/test-defect-boundary.js ; node tests/test-defect-card.js"
+
+    "test-positive": "node tests/test-success.js && node tests/test-insufficient-funds.js && node tests/test-negative-amount.js && node tests/test-commission.js && node tests/test-short-card.js && node tests/test-empty-amount.js",
+    "test-defects": "node tests/test-defect-boundary.js && node tests/test-defect-card.js",
+
+    "test": "npm run test-positive && npm run test-defect-boundary",
+    "test-all-local": "node tests/test-success.js & node tests/test-insufficient-funds.js & node tests/test-negative-amount.js & node tests/test-commission.js & node tests/test-short-card.js & node tests/test-empty-amount.js & node tests/test-defect-boundary.js & node tests/test-defect-card.js"
   },
   "dependencies": {
     "selenium-webdriver": "^4.20.0"

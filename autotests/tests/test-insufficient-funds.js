@@ -1,7 +1,7 @@
 const { Builder, By } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 
-(async function testSuccess() {
+(async function testInsufficientFunds() {
   const options = new chrome.Options();
   options.addArguments('--headless=new');
   options.addArguments('--no-sandbox');
@@ -9,8 +9,7 @@ const chrome = require('selenium-webdriver/chrome');
   options.addArguments('--window-size=1400,1000');
   options.setChromeBinaryPath(process.env.CHROME_BIN);
 
-  const service = new chrome.ServiceBuilder(
-    process.env.CHROMEDRIVER_PATH );
+  const service = new chrome.ServiceBuilder(process.env.CHROMEDRIVER_PATH);
 
   let driver = await new Builder()
     .forBrowser('chrome')
@@ -27,11 +26,27 @@ const chrome = require('selenium-webdriver/chrome');
     await inputs[0].sendKeys('1111222233334444');
 
     inputs = await driver.findElements(By.css('input'));
-    await inputs[1].sendKeys('1000');
+    await inputs[1].sendKeys('9100');
 
-    console.log('OK: тест на успех пройден');
+    const transferButtons = await driver.findElements(
+      By.xpath("//button[contains(., 'Перевести')]")
+    );
+
+    const insufficientMessage = await driver.findElements(
+      By.xpath("//*[contains(text(),'Недостаточно средств на счете')]")
+    );
+
+    if (transferButtons.length > 0) {
+      throw new Error('Кнопка перевода не должна отображаться при недостатке средств');
+    }
+
+    if (insufficientMessage.length === 0) {
+      throw new Error('Нет сообщения о недостатке средств');
+    }
+
+    console.log('OK: тест на недостаточность средств пройден');
   } catch (e) {
-    console.error('FAIL:', e);
+    console.error('FAIL:', e.message);
     process.exit(1);
   } finally {
     await driver.quit();

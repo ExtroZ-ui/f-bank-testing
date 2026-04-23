@@ -43,7 +43,7 @@ jobs:
         working-directory: autotests
         run: npm install
 
-      - name: Start app and run Selenium tests
+      - name: Start application and run all tests
         working-directory: autotests
         env:
           CHROME_BIN: ${{ env.CHROME_BIN }}
@@ -63,4 +63,16 @@ jobs:
           done
 
           cd autotests
-          npm test
+
+          echo "===== RUN POSITIVE TESTS ====="
+          npm run test-positive
+
+          DEFECT_EXIT=0
+
+          echo "===== RUN DEFECT TEST: BOUNDARY ====="
+          npm run test-defect-boundary || DEFECT_EXIT=1
+
+          echo "===== RUN DEFECT TEST: CARD LENGTH ====="
+          npm run test-defect-card || DEFECT_EXIT=1
+
+          exit $DEFECT_EXIT

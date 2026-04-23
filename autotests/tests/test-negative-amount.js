@@ -1,7 +1,11 @@
 const { Builder, By } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 
-(async function testSuccess() {
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+(async function testNegativeAmount() {
   const options = new chrome.Options();
   options.addArguments('--headless=new');
   options.addArguments('--no-sandbox');
@@ -9,8 +13,7 @@ const chrome = require('selenium-webdriver/chrome');
   options.addArguments('--window-size=1400,1000');
   options.setChromeBinaryPath(process.env.CHROME_BIN);
 
-  const service = new chrome.ServiceBuilder(
-    process.env.CHROMEDRIVER_PATH );
+  const service = new chrome.ServiceBuilder(process.env.CHROMEDRIVER_PATH);
 
   let driver = await new Builder()
     .forBrowser('chrome')
@@ -27,11 +30,21 @@ const chrome = require('selenium-webdriver/chrome');
     await inputs[0].sendKeys('1111222233334444');
 
     inputs = await driver.findElements(By.css('input'));
-    await inputs[1].sendKeys('1000');
+    await inputs[1].sendKeys('-100');
 
-    console.log('OK: тест на успех пройден');
+    await sleep(1000);
+
+    const transferButtons = await driver.findElements(
+      By.xpath("//button[contains(., 'Перевести')]")
+    );
+
+    if (transferButtons.length > 0) {
+      throw new Error('BUG: кнопка перевода появилась для отрицательной суммы');
+    }
+
+    console.log('OK: проверка отрицательной суммы пройдена');
   } catch (e) {
-    console.error('FAIL:', e);
+    console.error('FAIL:', e.message);
     process.exit(1);
   } finally {
     await driver.quit();

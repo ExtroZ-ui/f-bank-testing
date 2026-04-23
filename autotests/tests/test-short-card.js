@@ -1,7 +1,11 @@
 const { Builder, By } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 
-(async function testSuccess() {
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+(async function testShortCard() {
   const options = new chrome.Options();
   options.addArguments('--headless=new');
   options.addArguments('--no-sandbox');
@@ -9,8 +13,7 @@ const chrome = require('selenium-webdriver/chrome');
   options.addArguments('--window-size=1400,1000');
   options.setChromeBinaryPath(process.env.CHROME_BIN);
 
-  const service = new chrome.ServiceBuilder(
-    process.env.CHROMEDRIVER_PATH );
+  const service = new chrome.ServiceBuilder(process.env.CHROMEDRIVER_PATH);
 
   let driver = await new Builder()
     .forBrowser('chrome')
@@ -23,15 +26,22 @@ const chrome = require('selenium-webdriver/chrome');
 
     await driver.findElement(By.xpath("//*[contains(text(),'Рубли')]")).click();
 
-    let inputs = await driver.findElements(By.css('input'));
-    await inputs[0].sendKeys('1111222233334444');
+    const cardInput = await driver.findElement(By.css('input'));
+    await cardInput.sendKeys('111122223333444'); // 15 цифр
 
-    inputs = await driver.findElements(By.css('input'));
-    await inputs[1].sendKeys('1000');
+    await sleep(1000);
 
-    console.log('OK: тест на успех пройден');
+    const amountInputs = await driver.findElements(
+      By.css("input[placeholder='1000']")
+    );
+
+    if (amountInputs.length > 0) {
+      throw new Error('BUG: для номера карты длиной менее 16 цифр появилось поле сумма');
+    }
+
+    console.log('OK: тест валидации на короткий номер карты пройден');
   } catch (e) {
-    console.error('FAIL:', e);
+    console.error('FAIL:', e.message);
     process.exit(1);
   } finally {
     await driver.quit();
