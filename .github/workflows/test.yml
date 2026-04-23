@@ -93,18 +93,33 @@ jobs:
 
           cd autotests
 
-          echo "===== RUN POSITIVE TESTS ====="
-          npm run test-positive
+          OVERALL_EXIT=0
 
-          DEFECT_EXIT=0
+          echo "===== RUN POSITIVE TEST: SUCCESS ====="
+          npm run test-success || OVERALL_EXIT=1
+
+          echo "===== RUN POSITIVE TEST: INSUFFICIENT FUNDS ====="
+          npm run test-insufficient-funds || OVERALL_EXIT=1
+
+          echo "===== RUN POSITIVE TEST: NEGATIVE AMOUNT ====="
+          npm run test-negative-amount || OVERALL_EXIT=1
+
+          echo "===== RUN POSITIVE TEST: COMMISSION ====="
+          npm run test-commission || OVERALL_EXIT=1
+
+          echo "===== RUN POSITIVE TEST: SHORT CARD ====="
+          npm run test-short-card || OVERALL_EXIT=1
+
+          echo "===== RUN POSITIVE TEST: EMPTY AMOUNT ====="
+          npm run test-empty-amount || OVERALL_EXIT=1
 
           echo "===== RUN DEFECT TEST: BOUNDARY ====="
-          npm run test-defect-boundary || DEFECT_EXIT=1
+          npm run test-defect-boundary || OVERALL_EXIT=1
 
           echo "===== RUN DEFECT TEST: CARD LENGTH ====="
-          npm run test-defect-card || DEFECT_EXIT=1
+          npm run test-defect-card || OVERALL_EXIT=1
 
           echo "===== SERVER LOG ====="
           cat ../server.log || true
 
-          exit $DEFECT_EXIT
+          exit $OVERALL_EXIT
