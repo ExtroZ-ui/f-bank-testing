@@ -50,17 +50,46 @@ jobs:
           CHROMEDRIVER_PATH: ${{ env.CHROMEDRIVER_PATH }}
         run: |
           cd ..
-          python3 -m http.server 8000 > server.log 2>&1 &
+
+          nohup python3 -m http.server 8000 --bind 127.0.0.1 > server.log 2>&1 < /dev/null &
           SERVER_PID=$!
           echo "Started server with PID $SERVER_PID"
 
-          for i in {1..20}; do
-            if curl -s http://127.0.0.1:8000/?balance=30000&reserved=20001 > /dev/null; then
-              echo "Application is up"
+          sleep 2
+          if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+            echo "Server process died immediately"
+            cat server.log || true
+            exit 1
+          fi
+
+          SUCCESS_COUNT=0
+          for i in {1..30}; do
+            if curl -fsS "http://127.0.0.1:8000/?balance=30000&reserved=20001" > /dev/null; then
+              SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+              echo "Healthcheck success $SUCCESS_COUNT/3"
+            else
+              SUCCESS_COUNT=0
+            fi
+
+            if [ "$SUCCESS_COUNT" -ge 3 ]; then
+              echo "Application is stable and ready"
               break
             fi
+
+            if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+              echo "Server process died during warmup"
+              cat server.log || true
+              exit 1
+            fi
+
             sleep 1
           done
+
+          if [ "$SUCCESS_COUNT" -lt 3 ]; then
+            echo "Application did not become stable in time"
+            cat server.log || true
+            exit 1
+          fi
 
           cd autotests
 
@@ -74,5 +103,8 @@ jobs:
 
           echo "===== RUN DEFECT TEST: CARD LENGTH ====="
           npm run test-defect-card || DEFECT_EXIT=1
+
+          echo "===== SERVER LOG ====="
+          cat ../server.log || true
 
           exit $DEFECT_EXIT
