@@ -110,7 +110,7 @@ jobs:
           echo "===== RUN POSITIVE TEST: SHORT CARD ====="
           npm run test-short-card || OVERALL_EXIT=1
 
-          echo "===== RUN POSITIVE TEST: EMPTY AMOUNT ====="
+          echo "===== RUN DEFECT TEST: EMPTY AMOUNT ====="
           npm run test-empty-amount || OVERALL_EXIT=1
 
           echo "===== RUN DEFECT TEST: BOUNDARY ====="
