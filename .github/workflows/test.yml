@@ -1,4 +1,4 @@
-name: UI tests
+name: Python Selenium UI tests
 
 on:
   push:
@@ -12,17 +12,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
-      - name: Setup Chrome and matching ChromeDriver
+      - name: Setup Chrome and ChromeDriver
         id: setup-chrome
         uses: browser-actions/setup-chrome@v2
         with:
@@ -34,92 +29,32 @@ jobs:
         run: |
           echo "CHROME_BIN=${{ steps.setup-chrome.outputs.chrome-path }}" >> $GITHUB_ENV
           echo "CHROMEDRIVER_PATH=${{ steps.setup-chrome.outputs.chromedriver-path }}" >> $GITHUB_ENV
-          echo "Chrome path: ${{ steps.setup-chrome.outputs.chrome-path }}"
-          echo "ChromeDriver path: ${{ steps.setup-chrome.outputs.chromedriver-path }}"
           "${{ steps.setup-chrome.outputs.chrome-path }}" --version
           "${{ steps.setup-chrome.outputs.chromedriver-path }}" --version
 
-      - name: Install autotest dependencies
-        working-directory: autotests
-        run: npm install
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r autotests/requirements.txt
 
-      - name: Start application and run all tests
-        working-directory: autotests
+      - name: Start application
+        run: |
+          nohup python -m http.server 8000 --bind 127.0.0.1 > server.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS "http://127.0.0.1:8000/?balance=30000&reserved=20001" > /dev/null; then
+              echo "Application is ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Application did not start"
+          cat server.log || true
+          exit 1
+
+      - name: Run Python Selenium tests
         env:
+          BASE_URL: http://127.0.0.1:8000/?balance=30000&reserved=20001
           CHROME_BIN: ${{ env.CHROME_BIN }}
           CHROMEDRIVER_PATH: ${{ env.CHROMEDRIVER_PATH }}
         run: |
-          cd ..
-
-          nohup python3 -m http.server 8000 --bind 127.0.0.1 > server.log 2>&1 < /dev/null &
-          SERVER_PID=$!
-          echo "Started server with PID $SERVER_PID"
-
-          sleep 2
-          if ! kill -0 "$SERVER_PID" 2>/dev/null; then
-            echo "Server process died immediately"
-            cat server.log || true
-            exit 1
-          fi
-
-          SUCCESS_COUNT=0
-          for i in {1..30}; do
-            if curl -fsS "http://127.0.0.1:8000/?balance=30000&reserved=20001" > /dev/null; then
-              SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-              echo "Healthcheck success $SUCCESS_COUNT/3"
-            else
-              SUCCESS_COUNT=0
-            fi
-
-            if [ "$SUCCESS_COUNT" -ge 3 ]; then
-              echo "Application is stable and ready"
-              break
-            fi
-
-            if ! kill -0 "$SERVER_PID" 2>/dev/null; then
-              echo "Server process died during warmup"
-              cat server.log || true
-              exit 1
-            fi
-
-            sleep 1
-          done
-
-          if [ "$SUCCESS_COUNT" -lt 3 ]; then
-            echo "Application did not become stable in time"
-            cat server.log || true
-            exit 1
-          fi
-
-          cd autotests
-
-          OVERALL_EXIT=0
-
-          echo "===== RUN POSITIVE TEST: SUCCESS ====="
-          npm run test-success || OVERALL_EXIT=1
-
-          echo "===== RUN POSITIVE TEST: INSUFFICIENT FUNDS ====="
-          npm run test-insufficient-funds || OVERALL_EXIT=1
-
-          echo "===== RUN POSITIVE TEST: NEGATIVE AMOUNT ====="
-          npm run test-negative-amount || OVERALL_EXIT=1
-
-          echo "===== RUN POSITIVE TEST: COMMISSION ====="
-          npm run test-commission || OVERALL_EXIT=1
-
-          echo "===== RUN POSITIVE TEST: SHORT CARD ====="
-          npm run test-short-card || OVERALL_EXIT=1
-
-          echo "===== RUN DEFECT TEST: EMPTY AMOUNT ====="
-          npm run test-empty-amount || OVERALL_EXIT=1
-
-          echo "===== RUN DEFECT TEST: BOUNDARY ====="
-          npm run test-defect-boundary || OVERALL_EXIT=1
-
-          echo "===== RUN DEFECT TEST: CARD LENGTH ====="
-          npm run test-defect-card || OVERALL_EXIT=1
-
-          echo "===== SERVER LOG ====="
-          cat ../server.log || true
-
-          exit $OVERALL_EXIT
+          python -m pytest -v autotests/tests
